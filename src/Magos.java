@@ -1,4 +1,5 @@
 import javax.swing.plaf.PanelUI;
+import java.util.Arrays;
 
 public class Magos extends Personajes {
 
@@ -8,9 +9,9 @@ public class Magos extends Personajes {
     private String[] hechizos;
     public final int DAYO_JUGADOR = 10;
 
-    public Magos(String nombre, Razas raza, int fuerza, int puntosVidaMax, int puntosVida) {
-        super(nombre, raza, fuerza, puntosVidaMax, puntosVida);
-        hechizos = new String[NUM_MAX_HECHIZO];
+    public Magos(String nombre, Razas raza, int fuerza, int puntosVidaMax, int inteligencia) throws ErrorJuegoException {
+        super(nombre, raza, fuerza, puntosVidaMax, inteligencia);
+        this.hechizos = new String[NUM_MAX_HECHIZO];
     }
 
     /**
@@ -53,19 +54,18 @@ public class Magos extends Personajes {
      * @throws ErrorJuegoException
      */
     public void setHechizos(String hechizo) throws ErrorJuegoException {
-
         if(hechizo == null || hechizo.trim().isEmpty()){
             throw new ErrorJuegoException("No puedes dejar el campo nulo o vacío (espacios). ");
         }
-
-        for (int i = 0; i < hechizos.length; i++) {
+        boolean aprendido = false;
+        for (int i = 0; i < hechizos.length & !aprendido; i++) {
             if (hechizos[i] == null) {
                 hechizos[i] = hechizo;
+                aprendido = true;
             } else {
                 throw new ErrorJuegoException("No hay hueco en el array. ");
             }
         }
-
 
     }
 
@@ -81,24 +81,28 @@ public class Magos extends Personajes {
      */
     public Personajes lanzaHechizo(Personajes personaje, String hechizo) throws ErrorJuegoException {
 
-        boolean aprendido = false;
+        boolean encontrado = false;
         int numeroHechizo = 0;
 
-        for (int i = 0; i < hechizos.length; i++) {
+        for (int i = 0; i < hechizos.length & !encontrado; i++) {
             if (hechizos[i].equals(hechizo)) {
-                personaje.setPuntosVida(getPuntosVida() - DAYO_JUGADOR);
-                aprendido = true;
-                numeroHechizo = i;
-            } else {
-                throw new ErrorJuegoException("Aun no ha aprendido ese hechizo. ");
+                if(personaje.getPuntosVida() > PUNTOS_VIDA_MIN) {
+                    personaje.setPuntosVida(getPuntosVida() - DAYO_JUGADOR);
+                    hechizos[i] = null;
+                    encontrado = true;
+                }else {
+                    personaje.setPuntosVida(PUNTOS_VIDA_MIN);
+                }
             }
         }
-        if (aprendido) {
-            hechizos[numeroHechizo] = null;
-        }
-
         return personaje;
     }
 
+    @Override
+    public String toString() {
+        return "Magos{" +
+                "hechizos=" + Arrays.toString(hechizos) +
+                "} " + super.toString();
+    }
 
 }
